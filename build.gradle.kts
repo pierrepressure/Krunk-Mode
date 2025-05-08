@@ -73,6 +73,7 @@ val shadowImpl: Configuration by configurations.creating {
     configurations.implementation.get().extendsFrom(this)
 }
 
+
 dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
@@ -146,6 +147,16 @@ tasks.shadowJar {
 
     // If you want to include other dependencies and shadow them, you can relocate them in here
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+}
+loom {
+    runs {
+        named("client") {
+            vmArgs(
+                "-Ddevauth.enabled=true",
+                "-Ddevauth.account=main"
+            )
+        }
+    }
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
