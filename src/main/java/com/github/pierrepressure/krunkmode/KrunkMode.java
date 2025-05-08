@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 @Mod(
         modid = "krunkmode",
         name = "Krunk Mode",  // ← Change this
-        version = "69.0" // ← Change this
+        version = "1.0.0" // ← Change this
 )
 public class KrunkMode {
 
