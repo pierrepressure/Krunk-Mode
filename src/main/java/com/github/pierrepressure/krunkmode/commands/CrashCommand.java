@@ -1,17 +1,14 @@
-package com.github.pierrepressure.krunkmode;
+package com.github.pierrepressure.krunkmode.commands;
 
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class TestCommand extends CommandBase {
+public class CrashCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
@@ -20,7 +17,7 @@ public class TestCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "";
+        return "/cr - instantly crashes your game";
     }
 
     @Override

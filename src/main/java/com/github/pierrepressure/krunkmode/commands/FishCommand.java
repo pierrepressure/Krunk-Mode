@@ -1,7 +1,7 @@
-package com.github.pierrepressure.krunkmode;
+package com.github.pierrepressure.krunkmode.commands;
 
+import com.github.pierrepressure.krunkmode.SimpleFishManager;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 
@@ -15,15 +15,15 @@ public class FishCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "";
+        return "/fish - automatically fishes based on ding sound (turn on volume)";
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        boolean now = FishManager.INSTANCE.toggleEnabled();
+    public void processCommand(ICommandSender sender, String[] args)  {
+        boolean now = SimpleFishManager.INSTANCE.toggle();
         String status = now ? "§aEnabled" : "§cDisabled";
 
-            sender.addChatMessage(new ChatComponentText(String.format("[KMFish] %s", status)));
+            sender.addChatMessage(new ChatComponentText(String.format("§l§6[KMFish] %s", status)));
     }
 
     @Override

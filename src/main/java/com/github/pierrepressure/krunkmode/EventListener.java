@@ -7,6 +7,6 @@ public class EventListener {
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        FishManager.INSTANCE.onClientTick(event);
+        SimpleFishManager.INSTANCE.onTick(event);
     }
 }

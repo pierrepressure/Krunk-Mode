@@ -1,17 +1,9 @@
-package com.github.pierrepressure.krunkmode;
+package com.github.pierrepressure.krunkmode.commands;
 
+import com.github.pierrepressure.krunkmode.KrunkMode;
+import com.github.pierrepressure.krunkmode.MyGuiScreen;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class GuiCommand extends CommandBase {
 
@@ -22,7 +14,7 @@ public class GuiCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "";
+        return "/gui - displays a gui menu (useless)";
     }
 
     @Override
