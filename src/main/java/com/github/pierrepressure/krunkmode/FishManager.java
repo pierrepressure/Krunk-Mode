@@ -16,10 +16,10 @@ import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 
-public enum AutoFishManager {
+public enum FishManager {
     INSTANCE;  // Singleton instance
 
-    // === Constants used for tuning auto-fishing behavior ===
+    // === Constants used for tuning fishing behavior ===
     private static final int TICKS_PER_SECOND = 20;               // Minecraft ticks per second
     private static final int REEL_DELAY_MIN = 1;                  // Minimum reel delay (0.15s)
     private static final int REEL_DELAY_MAX = 4;                  // Maximum reel delay (0.30s)

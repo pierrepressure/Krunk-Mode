@@ -3,7 +3,6 @@ package com.github.pierrepressure.krunkmode;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 
 public class FishCommand extends CommandBase {
@@ -21,7 +20,7 @@ public class FishCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        boolean now = AutoFishManager.INSTANCE.toggleEnabled();
+        boolean now = FishManager.INSTANCE.toggleEnabled();
         String status = now ? "§aEnabled" : "§cDisabled";
 
             sender.addChatMessage(new ChatComponentText(String.format("[KMFish] %s", status)));
