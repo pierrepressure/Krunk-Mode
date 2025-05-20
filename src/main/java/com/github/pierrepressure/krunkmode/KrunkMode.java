@@ -24,7 +24,7 @@ import java.io.File;
         name = "Krunk Mode",  // ← Change this
         version = "1.0.4"// ← Change this
 )
-public class KrunkMode {
+public class KrunkMode { // .\gradlew.bat           .\gradlew --version
 
     // Centralized configuration
     public static KrunkModeConfig config;
