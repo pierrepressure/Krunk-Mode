@@ -7,17 +7,18 @@ import net.minecraft.util.ChatComponentText;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class HelpCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "KMHelp";
+        return "khelp";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/KMHelp - Lists all KrunkMode commands and their usage.";
+        return "/khelp - Lists all KrunkMode commands and their usage.";
     }
 
     @Override
@@ -27,10 +28,12 @@ public class HelpCommand extends CommandBase {
                 new CrashCommand(),
                 new FarmCommand(),
                 new FishCommand(),
-                new GuiCommand(),
+                new MenuCommand(),
                 new SigmaCommand()
                 // Add future commands here
         );
+
+        sender.addChatMessage(new ChatComponentText("§e§l- Krunk Mode Command List -" ));
 
         for (ICommand cmd : commands) {
             sender.addChatMessage(new ChatComponentText("§e" + cmd.getCommandUsage(sender)));

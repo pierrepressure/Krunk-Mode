@@ -1,15 +1,16 @@
-package com.github.pierrepressure.krunkmode;
+package com.github.pierrepressure.krunkmode.features;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.item.ItemFishingRod;
+import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Random;
 
-public enum SimpleFishManager {
+public enum FishManager {
     INSTANCE;
 
     // Configuration (milliseconds)
@@ -29,10 +30,10 @@ public enum SimpleFishManager {
     private long nextCastTime = 0;
     private long scheduledReelTime = 0;
 
-    public boolean toggle() {
+    public void toggle() {
         enabled = !enabled;
+        mc.thePlayer.addChatMessage(new ChatComponentText(String.format("§l§6[KM] Fishing %s", enabled ? "§a§lENABLED" : "§c§lDISABLED")));
         if(enabled) scheduleCast();
-        return enabled;
     }
 
     private void addViewDrift() {
@@ -46,7 +47,6 @@ public enum SimpleFishManager {
     }
 
 
-    @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if(!enabled || mc.thePlayer == null || event.phase == TickEvent.Phase.END) return;
         // Block if any GUI except chat is open
@@ -125,5 +125,9 @@ public enum SimpleFishManager {
     private boolean shouldReel(long currentTime) {
         return scheduledReelTime > 0 && currentTime >= scheduledReelTime;
 
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 }

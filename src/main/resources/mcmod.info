@@ -2,7 +2,7 @@
   {
     "modid": "${modid}",
     "name": "Krunk Mode",
-    "description": "its time to go krunkMode",
+    "description": "§l§o\"its time to go krunkMode\"",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/pierrepressure/Krunk-Mode/",
@@ -11,7 +11,7 @@
       "You"
     ],
     "credits": "",
-    "logoFile": "",
+    "logoFile": "logoTrans.png",
     "screenshots": [],
     "dependencies": []
   }

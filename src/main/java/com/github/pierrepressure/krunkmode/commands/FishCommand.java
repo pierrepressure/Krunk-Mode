@@ -1,9 +1,8 @@
 package com.github.pierrepressure.krunkmode.commands;
 
-import com.github.pierrepressure.krunkmode.SimpleFishManager;
+import com.github.pierrepressure.krunkmode.features.FishManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
 
 public class FishCommand extends CommandBase {
 
@@ -20,10 +19,7 @@ public class FishCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args)  {
-        boolean now = SimpleFishManager.INSTANCE.toggle();
-        String status = now ? "§aEnabled" : "§cDisabled";
-
-            sender.addChatMessage(new ChatComponentText(String.format("§l§6[KMFish] %s", status)));
+        FishManager.INSTANCE.toggle();
     }
 
     @Override

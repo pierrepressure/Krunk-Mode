@@ -1,27 +1,27 @@
 package com.github.pierrepressure.krunkmode.commands;
 
 import com.github.pierrepressure.krunkmode.KrunkMode;
-import com.github.pierrepressure.krunkmode.MyGuiScreen;
+import com.github.pierrepressure.krunkmode.KrunkMenu;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
-public class GuiCommand extends CommandBase {
+public class MenuCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "gui";
+        return "km";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/gui - displays a gui menu (useless)";
+        return "/km - displays the Krunk Menu";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
 
         //sender.addChatMessage(new ChatComponentText("hello i am sigma"));
-        KrunkMode.screenToOpenNextTick = new MyGuiScreen();
+        KrunkMode.screenToOpenNextTick = new KrunkMenu();
 
     }
 

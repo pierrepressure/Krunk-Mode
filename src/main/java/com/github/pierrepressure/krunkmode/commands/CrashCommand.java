@@ -12,12 +12,12 @@ public class CrashCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "cr";
+        return "kcr";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/cr - instantly crashes your game";
+        return "/kcr - instantly crashes your game";
     }
 
     @Override
