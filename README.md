@@ -10,7 +10,8 @@ Krunk Mode is a custom Minecraft Forge mod built for version 1.8.9
 ## ⚙️ Features
 
 - /sigma command for all your skibidi needs
-- /gui command for a fun color choosing screen
+- /km command for the Krunk Menu with all the settings
+- /khelp command for a full list of commands and their usages
 - /cr command to instantly crash your game
 - and so much more!
 
