@@ -1,6 +1,6 @@
 package com.github.pierrepressure.krunkmode.commands;
 
-import com.github.pierrepressure.krunkmode.features.FishManager;
+import com.github.pierrepressure.krunkmode.features.FisherManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
@@ -14,12 +14,12 @@ public class FishCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/fish - automatically fishes based on ding sound (turn on volume)";
+        return "§b/fish §7- §aautomatically fishes based on ding sound §7§o(turn on volume)  ";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args)  {
-        FishManager.INSTANCE.toggle();
+        FisherManager.INSTANCE.toggle();
     }
 
     @Override

@@ -11,6 +11,10 @@ public class KrunkModeConfig {
     private int autoPauseLoops;
     private boolean autoPlay;
 
+    //Clicker settings
+    private int maxCps;
+    private int minCps;
+
     /**
      * Create a new configuration instance
      *
@@ -20,6 +24,10 @@ public class KrunkModeConfig {
         this.config = new Configuration(configFile);
         loadConfig();
     }
+
+
+
+
 
     /**
      * Load configuration values from file or set defaults
@@ -44,6 +52,25 @@ public class KrunkModeConfig {
                 "Automatically resume after pause"
         );
 
+        // Load clicker settings
+        maxCps = config.getInt(
+                "maxCps",
+                "clicker",
+                10,
+                1,
+                20,
+                "Maximum clicks per second for the clicker"
+        );
+
+        minCps = config.getInt(
+                "minCps",
+                "clicker",
+                6,
+                1,
+                20,
+                "Minimum clicks per second for the clicker"
+        );
+
         // Save if changes were made
         if (config.hasChanged()) {
             config.save();
@@ -57,6 +84,28 @@ public class KrunkModeConfig {
         if (config != null) {
             config.save();
         }
+    }
+
+
+    // Getters and Setters for CPS
+    public int getMaxCps() {
+        return maxCps;
+    }
+
+    public void setMaxCps(int max) {
+        maxCps = max;
+        config.get("clicker", "maxCps", 10).set(max);
+        save();
+    }
+
+    public int getMinCps() {
+        return minCps;
+    }
+
+    public void setMinCps(int min) {
+        minCps = min;
+        config.get("clicker", "minCps", 6).set(min);
+        save();
     }
 
     /**
@@ -98,4 +147,5 @@ public class KrunkModeConfig {
         config.get("farming", "autoPlay", false).set(enabled);
         save();
     }
+
 }

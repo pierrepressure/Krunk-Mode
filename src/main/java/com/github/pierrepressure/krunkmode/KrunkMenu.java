@@ -1,6 +1,7 @@
 package com.github.pierrepressure.krunkmode;
 
-import com.github.pierrepressure.krunkmode.features.FarmCrop;
+import com.github.pierrepressure.krunkmode.features.farming.FarmCrop;
+import com.github.pierrepressure.krunkmode.features.ClickerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -8,7 +9,6 @@ import net.minecraft.client.gui.GuiTextField;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class KrunkMenu extends GuiScreen {
 
@@ -17,17 +17,19 @@ public class KrunkMenu extends GuiScreen {
 
     // Dimensions of the settings panel
     private final int panelWidth = 220;
-    private final int panelHeight = 180;
+    private final int panelHeight = 200;
 
     // Calculated X and Y position for centering the panel
     private int panelX;
     private int panelY;
 
     // Title text displayed at the top of the panel
-    private final String title = "§l§nKrunk Mode Settings";
+    private final String title = "§6§lKrunk Mode Settings";
 
     // Text field for user to input number of loops
     private GuiTextField numLoopsField;
+    private GuiTextField maxCpsField;
+    private GuiTextField minCpsField;
 
     @Override
     public void initGui() {
@@ -41,44 +43,52 @@ public class KrunkMenu extends GuiScreen {
         // Common button dimensions
         int buttonWidth = 150;
         int buttonHeight = 20;
+        int spacing = 50;
 
         // Calculate position for the close (X) button based on title width
         int titleWidth = fontRendererObj.getStringWidth(title);
-        int titleY = panelY + 15;
+        int titleY = panelY + 20;
         int closeX = (width / 2 - titleWidth / 2) - buttonHeight - 10;
         int closeY = titleY - (buttonHeight / 2);
 
         // Add a close button to the GUI
-        this.buttonList.add(new GuiButton(3, closeX, closeY, buttonHeight, buttonHeight, "§cX"));
+        this.buttonList.add(new GuiButton(0, closeX, closeY, buttonHeight, buttonHeight, "§c§lX"));
+        this.buttonList.add(new GuiButton(1, (width / 2 - titleWidth / 2) + titleWidth + 10, closeY, buttonHeight, buttonHeight, "§b§lⓘ"));
 
         // Calculate positions for toggle buttons in a column
         int toggleX = panelX + (panelWidth - buttonWidth) / 2;
-        int firstToggleY = titleY + 30;
-        int spacing = 25;
-
-        // Add three feature toggle buttons with default "Off" state
-        this.buttonList.add(new GuiButton(0, toggleX, firstToggleY + spacing * 0, buttonWidth, buttonHeight, "§6Amogus: Off"));
-        this.buttonList.add(new GuiButton(1, toggleX, firstToggleY + spacing * 1, buttonWidth, buttonHeight, "§2Low Taper Fade: Off"));
-        this.buttonList.add(new GuiButton(2, toggleX, firstToggleY + spacing * 2, buttonWidth, buttonHeight, "§dProperty in Egypt: Off"));
+        int firstToggleY = titleY + spacing - 10;
 
         // Position for the number-of-loops text field and apply button
-        int textFieldY = firstToggleY + spacing * 4;
-        int fieldWidth = 40;
-        int applyButtonWidth = 45;
-        int autoplayButtonWidth = 60;
+        int fieldWidth = (buttonWidth - 10) / 2;
 
         // Initialize number-of-loops text field - now using the config system
-        this.numLoopsField = new GuiTextField(4, this.fontRendererObj, toggleX, textFieldY, fieldWidth, buttonHeight);
+        this.numLoopsField = new GuiTextField(2, this.fontRendererObj, toggleX, firstToggleY, fieldWidth, buttonHeight);
         numLoopsField.setMaxStringLength(4);
         numLoopsField.setValidator(s -> s.matches("\\d*"));
         numLoopsField.setText(String.valueOf(FarmCrop.getAutoPauseLoops()));
 
-        // Add an "Apply" button next to the text field
-        this.buttonList.add(new GuiButton(5, toggleX + fieldWidth + 5, textFieldY, applyButtonWidth, buttonHeight, "Apply"));
-
         // Add an "Autoplay" button next to the text field - now using config system status
         String autoPlayLabel = FarmCrop.isAutoPlayEnabled() ? "§aAutoPlay" : "§cAutoPlay";
-        this.buttonList.add(new GuiButton(6, toggleX + fieldWidth + 5 + applyButtonWidth + 5, textFieldY, autoplayButtonWidth, buttonHeight, autoPlayLabel));
+        this.buttonList.add(new GuiButton(3, toggleX + fieldWidth + 5, firstToggleY, fieldWidth, buttonHeight, autoPlayLabel));
+
+        // Position for CPS fields below existing elements
+        int cpsY = titleY + spacing * 2; // Adjust spacing as needed
+
+        // Max CPS Text Field
+        this.maxCpsField = new GuiTextField(4, this.fontRendererObj, toggleX + fieldWidth + 5, cpsY, fieldWidth, buttonHeight);
+        maxCpsField.setMaxStringLength(2);
+        maxCpsField.setValidator(s -> s.matches("\\d*"));
+        maxCpsField.setText(String.valueOf(ClickerManager.getMaxCps()));
+
+        // Min CPS Text Field
+        this.minCpsField = new GuiTextField(5, this.fontRendererObj, toggleX, cpsY, fieldWidth, buttonHeight);
+        minCpsField.setMaxStringLength(2);
+        minCpsField.setValidator(s -> s.matches("\\d*"));
+        minCpsField.setText(String.valueOf(ClickerManager.getMinCps()));
+
+        // Add an "Apply" button to the bottom
+        this.buttonList.add(new GuiButton(6, toggleX, titleY + (spacing * 3) - 10, buttonWidth, buttonHeight, "Apply Changes"));
     }
 
     @Override
@@ -89,34 +99,60 @@ public class KrunkMenu extends GuiScreen {
         // Draw centered title string at top of panel
         drawCenteredString(fontRendererObj, title, width / 2, panelY + 15, 0xFFFFFF);
 
-        // Draw label for the number-of-loops field
-        int labelY = panelY + 45 + 25 * 4 - 10;
-        String label = "Melon Settings";
-        fontRendererObj.drawString(label, panelX + (panelWidth - 150) / 2, labelY, 0xFFFFFF);
+
+        String label = "Farming Settings";
+        fontRendererObj.drawString(label, panelX + (panelWidth - 150) / 2, numLoopsField.yPosition - 15, 0xFFFFFF);
 
         // Render the text field itself
         numLoopsField.drawTextBox();
+
+        // Draw CPS labels
+        String maxLabel = "Clicker CPS Settings";
+        int labelX = panelX + (panelWidth - 150) / 2;
+        fontRendererObj.drawString(maxLabel, labelX, maxCpsField.yPosition - 15, 0xFFFFFF);
+
+        // Render CPS text fields
+        maxCpsField.drawTextBox();
+        minCpsField.drawTextBox();
 
         // Render buttons and other GUI elements
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         // If hovering over the text field, show tooltip with instructions
         if (isMouseHovering(mouseX, mouseY, numLoopsField.xPosition, numLoopsField.yPosition, numLoopsField.width, numLoopsField.height)) {
-            List<String> tooltip = Arrays.asList("Number of Loops Before Pausing","(0 = infinity)");
-            this.drawHoveringText(tooltip, mouseX, mouseY);
+            this.drawHoveringText(Arrays.asList("Number of Loops Before Pausing", "§o(0 = infinity)"), mouseX, mouseY);
+        }
+
+        // Tooltips
+        if (isMouseHovering(mouseX, mouseY, maxCpsField.xPosition, maxCpsField.yPosition, maxCpsField.width, maxCpsField.height)) {
+            drawHoveringText(Arrays.asList("Maximum clicks per second", "§c§o(Stay under 12 just to be safe)"), mouseX, mouseY);
+        }
+        if (isMouseHovering(mouseX, mouseY, minCpsField.xPosition, minCpsField.yPosition, minCpsField.width, minCpsField.height)) {
+            drawHoveringText(Arrays.asList("Minimum clicks per second", "§8§o(must be less than max)"), mouseX, mouseY);
         }
 
         //If Hovering Over Certain Buttons
         for (GuiButton button : this.buttonList) {
             if (isMouseHovering(mouseX, mouseY, button.xPosition, button.yPosition, button.width, button.height)) {
                 switch (button.id) {
-                    case 5: //Hovering Over Apply Button
-                        this.drawHoveringText(Arrays.asList("Apply Changes"), mouseX, mouseY);
+
+                    case 0: //Hovering Over Delete Button
+                        this.drawHoveringText(Arrays.asList("Close"), mouseX, mouseY);
                         break;
 
-                    case 6: // Hovering over "AutoPlay" button
+                    case 1: //Hovering Over Info Button
+                        this.drawHoveringText(Arrays.asList("Information", "click to run /khelp for ", "a full list of commands"), mouseX, mouseY);
+                        break;
+
+                    case 3: // Hovering over "AutoPlay" button
                         this.drawHoveringText(Arrays.asList("Toggle Automatically Resuming", "After Closing Chat"), mouseX, mouseY);
                         break;
+
+                    case 6: //Hovering Over Apply Button
+                        this.drawHoveringText(Arrays.asList("Apply Your Setting Changes"), mouseX, mouseY);
+                        break;
+
+
                 }
             }
         }
@@ -124,40 +160,39 @@ public class KrunkMenu extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
-        // Handle toggle buttons (IDs 0-2)
-        if (button.id <= 2) {
-            String[] colors = {"§6", "§2", "§d"};
-            // Flip display from Off to On or vice versa
-            if (button.displayString.contains("Off")) {
-                button.displayString = button.displayString.replace("Off", "On").replaceAll("§[0-9a-f]", colors[button.id]);
-            } else {
-                button.displayString = button.displayString.replace("On", "Off").replaceAll("§[0-9a-f]", colors[button.id]);
-            }
+
+        switch (button.id) {
+            case 0: //Clicked On Delete Button
+                mc.displayGuiScreen(null);
+                break;
+
+            case 1: //Clicked On Info Button
+                net.minecraftforge.client.ClientCommandHandler.instance.executeCommand(mc.thePlayer, "/khelp");
+                break;
+
+            case 3: //Clicked On Autoplay Button
+                FarmCrop.toggleAutoPlay();
+                button.displayString = FarmCrop.isAutoPlayEnabled() ? "§aAutoPlay" : "§cAutoPlay";
+                break;
+
+            case 6: // Clicked On "Apply" button
+                applyNumLoops();
+                applyCpsSettings();
+                break;
         }
-        // Handle close button (ID 3)
-        else if (button.id == 3) {
-            mc.displayGuiScreen(null);
-        }
-        // Handle apply button for number-of-loops (ID 5)
-        else if (button.id == 5) {
-            applyNumLoops();
-        }
-        else if (button.id == 6) {
-            FarmCrop.toggleAutoPlay();
-            button.displayString = FarmCrop.isAutoPlayEnabled() ? "§aAutoPlay" : "§cAutoPlay";
-        }
+
     }
 
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         // Pass key event to parent for basic handling (e.g. ESC)
         super.keyTyped(typedChar, keyCode);
+
         // Forward key event to text field for input
         numLoopsField.textboxKeyTyped(typedChar, keyCode);
-        // If Enter is pressed, apply the number-of-loops immediately
-        if (keyCode == 28 || keyCode == 156) {
-            applyNumLoops();
-        }
+        maxCpsField.textboxKeyTyped(typedChar, keyCode);
+        minCpsField.textboxKeyTyped(typedChar, keyCode);
+
     }
 
     @Override
@@ -166,6 +201,8 @@ public class KrunkMenu extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         // Also send click event to text field to focus it
         numLoopsField.mouseClicked(mouseX, mouseY, mouseButton);
+        maxCpsField.mouseClicked(mouseX, mouseY, mouseButton);
+        minCpsField.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -181,9 +218,33 @@ public class KrunkMenu extends GuiScreen {
         try {
             // Parse number, default to 0 if empty
             int num = numLoopsField.getText().isEmpty() ? 0 : Integer.parseInt(numLoopsField.getText());
-            FarmCrop.setAutoPauseLoops(num);
+
+            if (FarmCrop.getAutoPauseLoops() != num) FarmCrop.setAutoPauseLoops(num);
         } catch (NumberFormatException e) {
             // Invalid input ignored; no crash
+        }
+    }
+
+    private void applyCpsSettings() {
+        try {
+            int max = Integer.parseInt(maxCpsField.getText());
+            max = Math.min(max, 20);
+
+            int min = Integer.parseInt(minCpsField.getText());
+            min = Math.min(Math.max(max - 1, 0), min);
+
+            // Ensure min <= max
+            if (min > max) {
+                maxCpsField.setText(String.valueOf(max));
+                minCpsField.setText(String.valueOf(min));
+            }
+
+            // Update ClickerManager and Config
+            if (ClickerManager.getMaxCps() != max) ClickerManager.setMaxCps(max);
+            if (ClickerManager.getMinCps() != min) ClickerManager.setMinCps(min);
+
+        } catch (NumberFormatException e) {
+            // Handle invalid input
         }
     }
 

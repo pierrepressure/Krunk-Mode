@@ -1,28 +1,23 @@
 package com.github.pierrepressure.krunkmode.commands;
 
-import com.github.pierrepressure.krunkmode.KrunkMode;
-import com.github.pierrepressure.krunkmode.KrunkMenu;
+import com.github.pierrepressure.krunkmode.features.ClickerManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
-public class MenuCommand extends CommandBase {
-
+public class ClickerCommand extends CommandBase {
     @Override
     public String getCommandName() {
-        return "km";
+        return "clicker";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "§b/km §7- §6displays the Krunk Menu  ";
+        return "§b/clicker §7- §atoggles the clicker";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-
-        //sender.addChatMessage(new ChatComponentText("hello i am sigma"));
-        KrunkMode.screenToOpenNextTick = new KrunkMenu();
-
+        ClickerManager.INSTANCE.toggle();
     }
 
     @Override

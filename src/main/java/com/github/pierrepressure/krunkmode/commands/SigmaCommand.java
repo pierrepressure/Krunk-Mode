@@ -19,13 +19,13 @@ public class SigmaCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/sigma - sends \"what the sigma\" in a random color";
+        return "§b/sigma §7- §asends \"what the sigma\" in a random color";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
+
         if (sender instanceof EntityPlayerSP) {
-            EntityPlayerSP player = (EntityPlayerSP) sender;
 
             // List of all Minecraft color codes
             List<String> colors = Arrays.asList(

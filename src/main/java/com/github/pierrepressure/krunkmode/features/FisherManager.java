@@ -5,18 +5,17 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Random;
 
-public enum FishManager {
+public enum FisherManager {
     INSTANCE;
 
     // Configuration (milliseconds)
-    private final int MIN_REEL_DELAY = 100;    // 0.1s
-    private final int MAX_REEL_DELAY = 300;    // 0.3s
-    private final int MIN_CAST_DELAY = 500;   // 1s
+    private final int MIN_REEL_DELAY = 200;    // 0.1s
+    private final int MAX_REEL_DELAY = 400;    // 0.3s
+    private final int MIN_CAST_DELAY = 700;   // 1s
     private final int MAX_CAST_DELAY = 1000;   // 2s
 
     private long lastSoundTime = 0;  // Time when the last sound was processed
@@ -71,7 +70,7 @@ public enum FishManager {
         }
     }
 
-    @SubscribeEvent
+
     public void onSound(PlaySoundEvent event) {
         if(!enabled || !event.name.equals("note.pling")) return;
         if(mc.currentScreen != null && !(mc.currentScreen instanceof GuiChat)) return;

@@ -1,61 +1,60 @@
-package com.github.pierrepressure.krunkmode.features;
+package com.github.pierrepressure.krunkmode.features.farming;
 
 import java.util.Random;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-public class FarmMelon extends FarmCrop {
+public class FarmPotato extends FarmCrop {
 
-    public static final FarmMelon INSTANCE = new FarmMelon();
+    public static final FarmPotato INSTANCE = new FarmPotato();
     private final int[] STEP_DURATIONS;
     private static boolean[][] STEP_KEYS;
     private final int randomDelay = new Random().nextInt(300);
     private int delaySwitchHotbarTicks = -1;
-    private long loadWorldTime;
 
-    private FarmMelon() {
+    private FarmPotato() {
+
         // Durations for each step in milliseconds
-        STEP_DURATIONS = new int[]{0,     // 0: Start
-                72000 + randomDelay,//71650,  // 1: Move left (hold A)
-                100,   // 2: Release A
-                500,   // 3: Move forward (hold W)
-                100,   // 4: Release W
-                72000 + randomDelay,//71650,  // 5: Move right (hold D)
-                100,   // 6: Release D
-                500,   // 7: Move forward (hold W)
-                100   // 8: Release W
+        STEP_DURATIONS = new int[]{
+                500,     // 0: Start
+                119500 + randomDelay,  // 1: Move left (hold A)
+                100,   // 2: Release
+                119500 + randomDelay,  // 3: Move right (hold D)
+                100,   // 4: Release
+                119500 + randomDelay,  // 5: Move left (hold A)
+                100,   // 6: Release
+                119500 + randomDelay,  // 7: Move right (hold D)
+                100,   // 8: Release
+                119500 + randomDelay,  // 9: Move left (hold A)
+                100,   // 10: Release
         };
 
         // Flags to track which keys should be pressed in each step
-        STEP_KEYS = new boolean[][]{{false, false, false},  // 0: Nothing only (left, right, forward, )
-                {true, false, false},   // 1: Move left
-                {false, false, false},  // 2:  Nothing only
-                {false, false, true},   // 3: Move forward +
-                {false, false, false},  // 4: Nothing only
-                {false, true, false},   // 5: Move right
-                {false, false, false},  // 6:  Nothing only
-                {false, false, true},   // 7: Move forward +
-                {false, false, false}   // 8:  Nothing only
+        STEP_KEYS = new boolean[][]{
+                {false, false, false},  // 0: Start
+                {false, true, false},   // 1: Move Right
+                {false, false, false},  // 2: Release
+                {true, false, false},   // 3: Move Left
+                {false, false, false},  // 4: Release
+                {false, true, false},   // 5: Move Right
+                {false, false, false},  // 6: Release
+                {true, false, false},  // 7: Move Left
+                {false, false, false},  // 8: Release
+                {false, true, false},  // 9: Move Right
+                {false, false, false}   // 10: Release
+
         };
-
-        // Set the instance in the parent class
-        FarmCrop.INSTANCE = this;
-
 
     }
 
     // Override method without static keyword
     @Override
     protected String getCropName() {
-        return "Melon";
+        return "Potato";
     }
 
     // Override method without static keyword
@@ -86,7 +85,8 @@ public class FarmMelon extends FarmCrop {
 
         //If Paused, update pause duration
         if (wasPaused) {
-            if (autoPlay && mc.currentScreen == null && !isLoopCompleted) play();
+            if (autoPlay && mc.currentScreen == null && !autoPaused)
+                play();
             return;
         }
 
@@ -110,21 +110,21 @@ public class FarmMelon extends FarmCrop {
             // Time to move to next step
             lastStepTime = now;
             currentStep++;
-            if (currentStep >= STEP_DURATIONS.length) {
-                currentStep = 0;
-                loopCount++;
-                if (loopCount >= 4) {
-                    mc.thePlayer.sendChatMessage("/warp garden");
-                    loopCount = 0;
-                    autoPLoopsCounter++;
 
-                    if (autoPauseLoops != 0 && (autoPLoopsCounter >= autoPauseLoops)) {
-                        mc.thePlayer.addChatMessage(new ChatComponentText(String.format("§6[KM] Farming Melon Completed §a§l%d §6Loops", autoPauseLoops)));
-                        pause();
-                        autoPLoopsCounter = 0;
-                        isLoopCompleted = true;
-                    }
+            if (currentStep >= STEP_DURATIONS.length) {
+
+                // Completed all steps, trigger warp and auto-pause logic
+                mc.thePlayer.sendChatMessage("/warp garden");
+                autoPLoopsCounter++;
+
+                if (autoPauseLoops != 0 && (autoPLoopsCounter >= autoPauseLoops)) {
+                    mc.thePlayer.addChatMessage(new ChatComponentText(String.format("§6[KM] Farming Potato Completed §a§l%d §6Loops", autoPauseLoops)));
+                    autoPaused = true;
+                    pause();
+                    autoPLoopsCounter = 0;
                 }
+
+                currentStep = 0; // Reset step for next start
             }
         }
     }
@@ -155,37 +155,12 @@ public class FarmMelon extends FarmCrop {
     /**
      * Toggle the farming routine on or off
      */
-    public static void toggle(EntityPlayer player) {
+    public void toggle(EntityPlayer player) {
         if (player.getName().equals("BlueSquire")) {
-            STEP_KEYS[1] = new boolean[]{false, true, false};
-            STEP_KEYS[5] = new boolean[]{true, false, false};
+            mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] §bBlueSquire §6Detected!"));
         }
-        FarmCrop.toggle(player);
+        FarmCrop.toggle(player,this);
     }
 
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    public void onWorldLoad(WorldEvent.Load event) {
-        long now = System.currentTimeMillis();
 
-        // Ignore loads within the cooldown window
-        if ((now - loadWorldTime) < 10000) return;
-
-        loadWorldTime = now;
-
-        if (event.world.isRemote && isRunning) { // Client-side world load
-
-            pause();
-
-            // Schedule hotbar switch to slot 9 (index 8) after a few ticks
-            delaySwitchHotbarTicks = new Random().nextInt(200) + 100; // 100 to 399 ticks delay
-
-            if (autoPlay) {
-                autoPlay = false;
-                mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] Detected world change! Auto Play §c§lDISABLED"));
-            } else {
-                mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] Detected world change!"));
-            }
-        }
-    }
 }

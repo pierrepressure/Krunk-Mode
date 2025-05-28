@@ -1,14 +1,14 @@
 package com.github.pierrepressure.krunkmode;
 
 import com.github.pierrepressure.krunkmode.commands.*;
-import com.github.pierrepressure.krunkmode.features.FarmCrop;
-import com.github.pierrepressure.krunkmode.features.FarmMelon;
-import com.github.pierrepressure.krunkmode.features.FishManager;
+import com.github.pierrepressure.krunkmode.commands.warp.WarpCommandHandler;
+import com.github.pierrepressure.krunkmode.features.farming.FarmCrop;
+import com.github.pierrepressure.krunkmode.features.ClickerManager;
+import com.github.pierrepressure.krunkmode.features.SneakerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -22,12 +22,15 @@ import java.io.File;
 @Mod(
         modid = "krunkmode",
         name = "Krunk Mode",  // ← Change this
-        version = "1.0.4"// ← Change this
+        version = "1.0.5"// ← Change this
 )
 public class KrunkMode { // .\gradlew.bat           .\gradlew --version
 
     // Centralized configuration
     public static KrunkModeConfig config;
+
+    // Warp command handler
+    public static WarpCommandHandler warpCommandHandler;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -38,6 +41,7 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
 
         // Initialize modules with config values
         FarmCrop.init(config);
+        ClickerManager.init(config);
     }
 
     @Mod.EventHandler
@@ -54,18 +58,14 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
         MinecraftForge.EVENT_BUS.register(new EventListener());
         MinecraftForge.EVENT_BUS.register(this);
 
-        MinecraftForge.EVENT_BUS.register(new Object() {
-            @SubscribeEvent
-            public void onSound(PlaySoundEvent event) {
-                FishManager.INSTANCE.onSound(event);
-            }
+        // Initialize and register warp commands
+        warpCommandHandler = new WarpCommandHandler();
 
-            @SubscribeEvent
-            public void onWorldLoad(WorldEvent.Load event) {
-                FarmMelon.INSTANCE.onWorldLoad(event);
-            }
-        });
+        // Add shutdown hook for handling forced closures
+        EventListener.addShutdownHook();
 
+        ClientRegistry.registerKeyBinding(SneakerManager.toggleSneakKey);
+        ClientRegistry.registerKeyBinding(SneakerManager.toggleSprintKey);
 
         // Register commands
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new FishCommand());
@@ -74,6 +74,8 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new SigmaCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new HelpCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new MenuCommand());
+        net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new ClickerCommand());
+        net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new MinerCommand());
     }
 
     // In your main mod class

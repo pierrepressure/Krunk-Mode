@@ -1,12 +1,15 @@
 // FarmCrop.java
-package com.github.pierrepressure.krunkmode.features;
+package com.github.pierrepressure.krunkmode.features.farming;
 
 import com.github.pierrepressure.krunkmode.KrunkModeConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+
+import java.util.Random;
 
 public abstract class FarmCrop {
     protected static final Minecraft mc = Minecraft.getMinecraft();
@@ -19,15 +22,17 @@ public abstract class FarmCrop {
     protected static boolean wasPaused = false;
     protected static int autoPLoopsCounter = 0;
     protected static long remainingStepTimeWhenPaused = 0;
-    protected static boolean isLoopCompleted = false;
+    protected static boolean autoPaused = false;
+    protected static int delaySwitchHotbarTicks = -1;
 
     // Add a protected static field to hold the instance
-    protected static FarmCrop INSTANCE;
+    public static FarmCrop INSTANCE;
 
     // Common configuration fields
     protected static int autoPauseLoops = 0;
     protected static boolean autoPlay = false;
     protected static KrunkModeConfig config;
+    private static long loadWorldTime;
 
     public abstract void onTick(ClientTickEvent event);
 
@@ -46,8 +51,13 @@ public abstract class FarmCrop {
         autoPlay = config.isAutoPlayEnabled();
     }
 
-    public static void toggle(EntityPlayer player) {
+    public abstract void toggle(EntityPlayer player);
+
+    // Change to use instance method from the provided instance
+    public static void toggle(EntityPlayer player, FarmCrop cropInstance) {
+        INSTANCE = cropInstance;
         isRunning = !isRunning;
+        autoPaused = false;
         autoPLoopsCounter = 0;
 
         if (isRunning) {
@@ -62,7 +72,7 @@ public abstract class FarmCrop {
 
         player.addChatMessage(new ChatComponentText(
                 String.format("§l§6[KM] Farming %s %s",
-                        FarmCrop.INSTANCE.getCropName(), // Use instance reference
+                        cropInstance.getCropName(), // Use the provided instance
                         isRunning ? "§a§lSTARTED!" : "§c§lSTOPPED!")
         ));
     }
@@ -74,14 +84,13 @@ public abstract class FarmCrop {
             releaseAllKeys();
             wasPaused = true;
             mc.thePlayer.addChatMessage(new ChatComponentText(
-                    String.format("§6[KM] Farming %s §c§lPAUSED", getCropName())
-            ));
+                    String.format("§6[KM] Farming %s §c§lPAUSED", getCropName())));
         }
     }
 
     public static void play() {
         if (isRunning && wasPaused) {
-            isLoopCompleted = false;
+            autoPaused = false;
             releaseAllKeys();
             wasPaused = false;
             lastStepTime = System.currentTimeMillis() - (
@@ -107,8 +116,8 @@ public abstract class FarmCrop {
         autoPauseLoops = num;
         if (config != null) config.setAutoPauseLoops(num);
         mc.thePlayer.addChatMessage(new ChatComponentText(
-                String.format("§6[KM] Farming %s Max Loops: §a§l%d",
-                        FarmCrop.INSTANCE.getCropName(), num) // Use instance reference
+                String.format("§6[KM] Farming Auto Pause Loops: §a§l%d"
+                        , num) // Use instance reference
         ));
     }
 
@@ -116,7 +125,7 @@ public abstract class FarmCrop {
         return autoPauseLoops;
     }
 
-    public boolean isRunning() {
+    public static boolean isRunning() {
         return isRunning;
     }
 
@@ -130,6 +139,46 @@ public abstract class FarmCrop {
 
     public static boolean isAutoPlayEnabled() {
         return autoPlay;
+    }
+
+    public static FarmCrop getInstance(){
+        return INSTANCE;
+    }
+
+    public static boolean isPaused(){
+        return wasPaused;
+    }
+
+    public static void setAutoPaused(boolean p){
+        autoPaused = p;
+    }
+
+    public static boolean isAutoPaused(){
+        return autoPaused;
+    }
+
+    public void onWorldLoad(WorldEvent.Load event) {
+        long now = System.currentTimeMillis();
+
+        // Ignore loads within the cooldown window
+        if ((now - loadWorldTime) < 10000) return;
+
+        loadWorldTime = now;
+
+        if (event.world.isRemote && !wasPaused) { // Client-side world load
+
+            pause();
+
+            // Schedule hotbar switch to slot 9 (index 8) after a few ticks
+            delaySwitchHotbarTicks = new Random().nextInt(100) + 100; // 100 to 199 ticks delay
+
+            if (autoPlay) {
+                autoPlay = false;
+                mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] Detected world change! Auto Play §c§lDISABLED"));
+            } else {
+                mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] Detected world change!"));
+            }
+        }
     }
 
 

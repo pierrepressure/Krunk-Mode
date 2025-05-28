@@ -1,32 +1,27 @@
 package com.github.pierrepressure.krunkmode.commands;
 
-import com.github.pierrepressure.krunkmode.KrunkMode;
-import com.github.pierrepressure.krunkmode.KrunkMenu;
+import com.github.pierrepressure.krunkmode.features.MinerManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
-public class MenuCommand extends CommandBase {
-
+public class MinerCommand extends CommandBase {
     @Override
     public String getCommandName() {
-        return "km";
+        return "mine";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "§b/km §7- §6displays the Krunk Menu  ";
+        return "§b/mine §7- §atoggles holding break";
     }
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-
-        //sender.addChatMessage(new ChatComponentText("hello i am sigma"));
-        KrunkMode.screenToOpenNextTick = new KrunkMenu();
-
+        MinerManager.INSTANCE.toggle();
     }
-
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
     }
+
 }

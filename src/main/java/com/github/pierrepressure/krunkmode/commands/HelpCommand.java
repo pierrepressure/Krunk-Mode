@@ -7,7 +7,6 @@ import net.minecraft.util.ChatComponentText;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class HelpCommand extends CommandBase {
 
@@ -23,23 +22,25 @@ public class HelpCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
+
         // List all command instances here manually for now
         List<ICommand> commands = Arrays.asList(
-                new CrashCommand(),
+                new MenuCommand(),
                 new FarmCommand(),
                 new FishCommand(),
-                new MenuCommand(),
-                new SigmaCommand()
+                new ClickerCommand(),
+                new MinerCommand(),
+                new SigmaCommand(),
+                new CrashCommand()
                 // Add future commands here
         );
 
-        sender.addChatMessage(new ChatComponentText("§e§l- Krunk Mode Command List -" ));
+        sender.addChatMessage(new ChatComponentText("§e§l- Krunk Mode Command List -"));
 
         for (ICommand cmd : commands) {
             sender.addChatMessage(new ChatComponentText("§e" + cmd.getCommandUsage(sender)));
         }
     }
-
 
 
     @Override

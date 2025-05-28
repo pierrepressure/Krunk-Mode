@@ -1,7 +1,6 @@
 package com.github.pierrepressure.krunkmode.commands;
 
-import com.github.pierrepressure.krunkmode.features.FarmCrop;
-import com.github.pierrepressure.krunkmode.features.FarmMelon;
+import com.github.pierrepressure.krunkmode.features.farming.*;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -21,6 +20,13 @@ public class FarmCommand extends CommandBase {
     static {
         // Register all available crops
         CROP_REGISTRY.put("melon", FarmMelon.INSTANCE);
+        CROP_REGISTRY.put("wart", FarmWart.INSTANCE);
+        CROP_REGISTRY.put("potato", FarmPotato.INSTANCE);
+        CROP_REGISTRY.put("carrot", FarmCarrot.INSTANCE);
+        CROP_REGISTRY.put("wheat", FarmWheat.INSTANCE);
+        CROP_REGISTRY.put("pumpkin", FarmPumpkin.INSTANCE);
+        CROP_REGISTRY.put("cane", FarmCane.INSTANCE);
+        CROP_REGISTRY.put("coco", FarmCocoa.INSTANCE);
         // Add new crops here when implemented:
         // CROP_REGISTRY.put("wheat", FarmWheat.INSTANCE);
     }
@@ -32,7 +38,8 @@ public class FarmCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/farm <crop> to toggle farming a crop\n" + "/farm play to resume paused farming";
+        return "§b/farm <crop> §7- §atoggle farming a specific crop\n"
+                + "§b/farm <pause/play> §7- §apause or resume a farming cycle";
     }
 
     @Override
@@ -49,6 +56,12 @@ public class FarmCommand extends CommandBase {
             return;
         }
 
+        if (type.equals("pause")) {
+            handlePauseCommand(player);
+            return;
+        }
+
+
         FarmCrop selectedCrop = CROP_REGISTRY.get(type);
         if (selectedCrop == null) {
             throw new WrongUsageException("Invalid farm type. Available: " + String.join(", ", CROP_REGISTRY.keySet()));
@@ -58,14 +71,15 @@ public class FarmCommand extends CommandBase {
     }
 
     private void handleCropSwitch(FarmCrop newCrop, EntityPlayer player) {
+
         // Stop previous crop if different and running
-        if (currentCrop != null && currentCrop != newCrop && currentCrop.isRunning()) {
-            currentCrop.toggle(player);
+        if (currentCrop != null && currentCrop != newCrop && FarmCrop.isRunning()) {
+            FarmCrop.toggle(player, currentCrop);
         }
 
         // Toggle new crop
         currentCrop = newCrop;
-        currentCrop.toggle(player);
+        newCrop.toggle(player);
     }
 
     private void handlePlayCommand(EntityPlayer player) {
@@ -74,12 +88,27 @@ public class FarmCommand extends CommandBase {
             return;
         }
 
-        if (!currentCrop.isRunning()) {
+        if (!FarmCrop.isPaused()) {
             player.addChatMessage(new ChatComponentText("§cFarm is not paused!"));
             return;
         }
 
-        currentCrop.play();
+        FarmCrop.play();
+    }
+
+    private void handlePauseCommand(EntityPlayer player) {
+        if (currentCrop == null) {
+            player.addChatMessage(new ChatComponentText("§cNo active crop to pause!"));
+            return;
+        }
+
+        if (FarmCrop.isAutoPaused()) {
+            player.addChatMessage(new ChatComponentText("§cFarm is already paused!"));
+            return;
+        }
+
+        FarmCrop.setAutoPaused(true);
+        FarmCrop.INSTANCE.pause();
     }
 
     @Override
