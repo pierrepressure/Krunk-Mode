@@ -73,6 +73,7 @@ public class WarpCommandHandler {
 
         //Dungeon hub island
         registerCommand(new WarpCommand("dun", "dungeon_hub"));
+        registerCommand(new WarpCommand("dh"));
 
         //Barn island
         registerCommand(new WarpCommand("barn"));

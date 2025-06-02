@@ -6,6 +6,10 @@ import com.github.pierrepressure.krunkmode.features.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -19,9 +23,9 @@ public class EventListener {
     private static final String[] trollMsg = {"§aFriend > §r§cJayavarmen §r§eleft.§r",
             "§f                     §7You have §a0 §7items stashed away!§r\n" +
                     "§f                §6§l>>> §6§lCLICK HERE§e to pick them up! §6§l<<<§r",
-    "§r§aYour §r§5Great Spook Tree §r§ahas just sprouted a fruit!§r",
-    "§r§c[Important] §r§eThis server will restart soon: §r§bScheduled Reboot§r\n" +
-            "§eYou have §a10 seconds §eto warp out! §a§l§nCLICK§e to warp now!§r",
+            "§r§aYour §r§5Great Spook Tree §r§ahas just sprouted a fruit!§r",
+            "§r§c[Important] §r§eThis server will restart soon: §r§bScheduled Reboot§r\n" +
+                    "§eYou have §a10 seconds §eto warp out! §a§l§nCLICK§e to warp now!§r",
             "§b§l---------------------------------------------\n" +
                     "§aYou have just received §60 coins §aas bank interest!\n" +
                     "§b§l---------------------------------------------",
@@ -32,7 +36,7 @@ public class EventListener {
             "§r§cPest Repellent MAX expires in §r§e30s§r§c§r"
     };
 
-
+    private static final Minecraft mc = Minecraft.getMinecraft();
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
@@ -85,10 +89,9 @@ public class EventListener {
 
     @SubscribeEvent
     public void onClientDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayer player = mc.thePlayer;
         if (player != null) {
             DiscManager.sendPlayerLeaveMessage(player);
-            System.out.println("DISCONNECT: message sent");
         }
     }
 
@@ -98,27 +101,77 @@ public class EventListener {
         new Thread(() -> {
             try {
                 Thread.sleep(2000); // Wait for player entity to load
-                EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+                EntityPlayer player = mc.thePlayer;
+
                 if (player != null) {
                     DiscManager.sendPlayerJoinMessage(player);
                 }
+
             } catch (Exception e) {
                 System.err.println("Error sending join message: " + e.getMessage());
             }
         }).start();
     }
 
+
+    @SubscribeEvent
+    public void onChatReceived(ClientChatReceivedEvent event) {
+        if (event.type != 0) return; // Only handle normal chat messages
+
+        IChatComponent message = event.message;
+        String formattedMessage = message.getFormattedText();
+
+        // Pattern 2: Check unformatted message for skull symbol and "You"
+        if (formattedMessage.contains("☠") && formattedMessage.contains("You") && !formattedMessage.contains(":")) {
+            DiscManager.handleDeathMessage(formattedMessage);
+        }
+    }
+
+
+    @SubscribeEvent
+    public void onGuiOpen(GuiOpenEvent event) {
+        if(KrunkMode.config.autoExperimentsEnabled) {
+            ExperimentManager.onGuiOpen(event);
+        }
+
+    }
+
+    @SubscribeEvent
+    public void onGuiDraw(GuiScreenEvent.DrawScreenEvent.Post event) {
+        if(KrunkMode.config.autoExperimentsEnabled) {
+            ExperimentManager.onGuiDraw(event);
+        }
+    }
+
+//    @SubscribeEvent
+//    public void onGuiOpen(GuiOpenEvent event) {
+//
+//        // Check if the GUI is closing and KrunkMode config is available
+//        if (event.gui != null || KrunkMode.config == null || mc.thePlayer == null) return;
+//
+//        // Check if both are non-null and of the same class
+//        if (mc.currentScreen != null && KrunkMode.config.gui() != null &&
+//                (mc.currentScreen instanceof gg.essential.vigilance.gui.SettingsGui ||
+//                        mc.currentScreen.getClass().getName().equals("cc.polyfrost.oneconfig.gui.OneConfigGui"))) {
+//
+//            ClickerManager.updateSettings();
+//            FarmCrop.updateSettings();
+//        }
+//    }
+
     // Add shutdown hook in your main mod class initialization
     public static void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
+                System.out.println("Shutdown hook triggered - sending leave message");
 
-                EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-                if (player != null) {
+                // Use the new shutdown-specific method
+                if(mc.theWorld!=null) DiscManager.sendShutdownLeaveMessage();
 
-                    DiscManager.sendPlayerLeaveMessage(player);
 
-                }
+                // Give a small buffer to ensure the message is sent
+                Thread.sleep(100);
+
             } catch (Exception e) {
                 System.err.println("Error in shutdown hook: " + e.getMessage());
             }

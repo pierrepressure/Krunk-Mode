@@ -1,6 +1,6 @@
 package com.github.pierrepressure.krunkmode.features;
 
-import com.github.pierrepressure.krunkmode.KrunkModeConfig;
+import com.github.pierrepressure.krunkmode.VigilanceConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ChatComponentText;
@@ -20,16 +20,17 @@ public enum ClickerManager {
     private long nextLeftClickTime = 0;
     private long nextRightClickTime = 0;
 
-    private static KrunkModeConfig config;
+    private static VigilanceConfig config;
 
-    public static void init(KrunkModeConfig config) {
+    public static void init(VigilanceConfig config) {
         ClickerManager.config = config;
-        maxCps = config.getMaxCps();
-        minCps = config.getMinCps();
+        maxCps = config.maxCps;
+        minCps = config.minCps;
     }
 
     public void toggle() {
         enabled = !enabled;
+        updateSettings();
         if (mc.thePlayer != null) {
             mc.thePlayer.addChatMessage(new ChatComponentText(
                     "§l§6[KM] Clicker " + (enabled ? "§a§lENABLED" : "§c§lDISABLED")
@@ -40,6 +41,7 @@ public enum ClickerManager {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!enabled || mc.thePlayer == null || event.phase == TickEvent.Phase.END) return;
         if (mc.currentScreen != null) return;
+
 
         long now = System.currentTimeMillis();
 
@@ -63,8 +65,14 @@ public enum ClickerManager {
 
 
         double mean = (minDelay + maxDelay) / 2.0;
-        double standardDeviation = (maxDelay - minDelay) / 6.0;
+        double standardDeviation;
 
+        // If delays are equal (minCps == maxCps), add a small artificial deviation
+        if (minDelay == maxDelay) {
+            standardDeviation = minDelay * 0.45;
+        } else {
+            standardDeviation = (maxDelay - minDelay) / 6.0;
+        }
 
         double gaussianValue = random.nextGaussian() * standardDeviation + mean;
 
@@ -86,28 +94,20 @@ public enum ClickerManager {
         return enabled;
     }
 
-    public static void setMaxCps(int cps){
-        maxCps = Math.min(cps,20); //Capping cps at 20
-        if (config != null) config.setMaxCps(cps);
-        mc.thePlayer.addChatMessage(new ChatComponentText(
-                String.format("§6[KM] Clicker Max CPS: §a§l%d", maxCps) // Use instance reference
-        ));
+
+    // If you have methods that update config values:
+    public static void updateSettings() {
+
+        if (minCps != config.minCps ||maxCps != config.maxCps) {
+            minCps = Math.min(config.minCps, config.maxCps);
+            maxCps = Math.max(config.minCps, config.maxCps);
+//            mc.thePlayer.addChatMessage(new ChatComponentText("§6§lUPDATED! §6MinCPS: §a§l"
+//                    + minCps+ " §6MaxCPS: §a§l"+maxCps));
+        }
+
+
     }
 
-    public static void setMinCps(int cps){
-        minCps = Math.min(Math.max(maxCps-1,0),cps); //Capping max cps
-        if (config != null) config.setMinCps(cps);
-        mc.thePlayer.addChatMessage(new ChatComponentText(
-                String.format("§6[KM] Clicker Min CPS: §a§l%d", minCps) // Use instance reference
-        ));
-    }
-
-    public static int getMaxCps(){
-        return maxCps;
-    }
-
-    public static int getMinCps(){
-        return minCps;
-    }
 
 }
+

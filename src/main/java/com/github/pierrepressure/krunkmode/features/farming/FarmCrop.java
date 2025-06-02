@@ -1,7 +1,7 @@
 // FarmCrop.java
 package com.github.pierrepressure.krunkmode.features.farming;
 
-import com.github.pierrepressure.krunkmode.KrunkModeConfig;
+import com.github.pierrepressure.krunkmode.VigilanceConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,30 +9,31 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-import java.util.Random;
 
-public abstract class FarmCrop {
+public abstract class FarmCrop  {
     protected static final Minecraft mc = Minecraft.getMinecraft();
 
     // Common state fields
-    protected static boolean isRunning = false;
+    public static boolean isRunning = false;
     protected static int currentStep = 0;
     protected static long lastStepTime = 0;
     protected static int loopCount = 0;
     protected static boolean wasPaused = false;
-    protected static int autoPLoopsCounter = 0;
     protected static long remainingStepTimeWhenPaused = 0;
     protected static boolean autoPaused = false;
-    protected static int delaySwitchHotbarTicks = -1;
+    protected static int autoPauseLoops = 0;
+    protected static boolean autoPlay = false;
+    protected static int autoPLoopsCounter = 0;
 
     // Add a protected static field to hold the instance
     public static FarmCrop INSTANCE;
 
     // Common configuration fields
-    protected static int autoPauseLoops = 0;
-    protected static boolean autoPlay = false;
-    protected static KrunkModeConfig config;
-    private static long loadWorldTime;
+    protected static VigilanceConfig config;
+
+    public static boolean isRunning() {
+        return isRunning;
+    }
 
     public abstract void onTick(ClientTickEvent event);
 
@@ -45,10 +46,11 @@ public abstract class FarmCrop {
     // Change from static to abstract method
     protected abstract void applyCurrentStepKeys();
 
-    public static void init(KrunkModeConfig config) {
+    public static void init(VigilanceConfig config) {
         FarmCrop.config = config;
-        autoPauseLoops = config.getAutoPauseLoops();
-        autoPlay = config.isAutoPlayEnabled();
+        autoPauseLoops = config.autoPauseLoops;
+        autoPlay = config.autoPlay;
+
     }
 
     public abstract void toggle(EntityPlayer player);
@@ -59,6 +61,7 @@ public abstract class FarmCrop {
         isRunning = !isRunning;
         autoPaused = false;
         autoPLoopsCounter = 0;
+        updateSettings();
 
         if (isRunning) {
             lastStepTime = System.currentTimeMillis();
@@ -89,6 +92,8 @@ public abstract class FarmCrop {
     }
 
     public static void play() {
+        updateSettings();
+
         if (isRunning && wasPaused) {
             autoPaused = false;
             releaseAllKeys();
@@ -97,7 +102,11 @@ public abstract class FarmCrop {
                     FarmCrop.INSTANCE.getCurrentStepDuration() - // Use instance reference
                             remainingStepTimeWhenPaused - 100);
             remainingStepTimeWhenPaused = 0;
-            FarmCrop.INSTANCE.applyCurrentStepKeys(); // Use instance reference
+
+            if(mc.currentScreen==null) {
+                FarmCrop.INSTANCE.applyCurrentStepKeys(); // Use instance reference
+            }
+
             mc.thePlayer.addChatMessage(new ChatComponentText(
                     String.format("§6[KM] Farming %s §a§lUNPAUSED",
                             FarmCrop.INSTANCE.getCropName()) // Use instance reference
@@ -112,33 +121,19 @@ public abstract class FarmCrop {
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
     }
 
-    public static void setAutoPauseLoops(int num) {
-        autoPauseLoops = num;
-        if (config != null) config.setAutoPauseLoops(num);
-        mc.thePlayer.addChatMessage(new ChatComponentText(
-                String.format("§6[KM] Farming Auto Pause Loops: §a§l%d"
-                        , num) // Use instance reference
-        ));
-    }
+    // If you have methods that update config values:
+    public static void updateSettings() {
 
-    public static int getAutoPauseLoops() {
-        return autoPauseLoops;
-    }
+        if (autoPauseLoops != config.autoPauseLoops){
+            autoPauseLoops = config.autoPauseLoops;
+//            mc.thePlayer.addChatMessage(new ChatComponentText("§6§lUPDATED! §6AutPauseLoops: §a§l" + autoPauseLoops));
+        }
 
-    public static boolean isRunning() {
-        return isRunning;
-    }
+        if(autoPlay != config.autoPlay){
+            autoPlay = config.autoPlay;
+//            mc.thePlayer.addChatMessage(new ChatComponentText("§6§lUPDATED! §6Autoplay: §a§l" + autoPlay));
+        }
 
-    public static void toggleAutoPlay() {
-        autoPlay = !autoPlay;
-        if (config != null) config.setAutoPlayEnabled(autoPlay);
-        mc.thePlayer.addChatMessage(new ChatComponentText(
-                String.format("§l§6[KM] Auto Play %s", autoPlay ? "§a§lENABLED" : "§c§lDISABLED")
-        ));
-    }
-
-    public static boolean isAutoPlayEnabled() {
-        return autoPlay;
     }
 
     public static FarmCrop getInstance(){
@@ -158,19 +153,8 @@ public abstract class FarmCrop {
     }
 
     public void onWorldLoad(WorldEvent.Load event) {
-        long now = System.currentTimeMillis();
-
-        // Ignore loads within the cooldown window
-        if ((now - loadWorldTime) < 10000) return;
-
-        loadWorldTime = now;
 
         if (event.world.isRemote && !wasPaused) { // Client-side world load
-
-            pause();
-
-            // Schedule hotbar switch to slot 9 (index 8) after a few ticks
-            delaySwitchHotbarTicks = new Random().nextInt(100) + 100; // 100 to 199 ticks delay
 
             if (autoPlay) {
                 autoPlay = false;
@@ -178,6 +162,21 @@ public abstract class FarmCrop {
             } else {
                 mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] Detected world change!"));
             }
+
+            pause();
+
+            // Delay Hotbar Swap
+            new Thread(() -> {
+                try {
+                    Thread.sleep(3000); // Wait for player entity to load
+                    if (mc.thePlayer != null && mc.thePlayer.inventory != null) {
+                        mc.thePlayer.inventory.currentItem = 8; // Select slot 9
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Error Selecting Hotbar: " + e.getMessage());
+                }
+            }).start();
         }
     }
 

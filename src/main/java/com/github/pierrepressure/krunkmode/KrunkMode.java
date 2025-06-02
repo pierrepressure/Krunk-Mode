@@ -2,6 +2,8 @@ package com.github.pierrepressure.krunkmode;
 
 import com.github.pierrepressure.krunkmode.commands.*;
 import com.github.pierrepressure.krunkmode.commands.warp.WarpCommandHandler;
+import com.github.pierrepressure.krunkmode.features.ExperimentManager;
+import com.github.pierrepressure.krunkmode.features.FisherManager;
 import com.github.pierrepressure.krunkmode.features.farming.FarmCrop;
 import com.github.pierrepressure.krunkmode.features.ClickerManager;
 import com.github.pierrepressure.krunkmode.features.SneakerManager;
@@ -16,44 +18,42 @@ import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.io.File;
-
 
 @Mod(
         modid = "krunkmode",
-        name = "Krunk Mode",  // ← Change this
-        version = "1.0.5"// ← Change this
+        name = "Krunk Mode",
+        version = "1.0.6"
 )
-public class KrunkMode { // .\gradlew.bat           .\gradlew --version
+public class KrunkMode {
 
-    // Centralized configuration
-    public static KrunkModeConfig config;
-
+    // Replace the old config with Vigilance config
+    public static VigilanceConfig config;
     // Warp command handler
     public static WarpCommandHandler warpCommandHandler;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-
-        // Initialize config file using configuration class
-        File configFile = new File(event.getModConfigurationDirectory(), "krunkmode.cfg");
-        config = new KrunkModeConfig(configFile);
+        // Initialize Vigilance config (it handles file creation automatically)
+        config = new VigilanceConfig();
 
         // Initialize modules with config values
+        // Note: You may need to update these methods to use the new config structure
         FarmCrop.init(config);
         ClickerManager.init(config);
+        FisherManager.init(config);
+        ExperimentManager.init(config);
     }
+
 
     @Mod.EventHandler
     public void onServerStopped(FMLServerStoppedEvent event) {
         if (config != null) {
-            config.save();
+            config.save(); // Save config on server stop
         }
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
         // Register event listeners
         MinecraftForge.EVENT_BUS.register(new EventListener());
         MinecraftForge.EVENT_BUS.register(this);
@@ -64,10 +64,11 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
         // Add shutdown hook for handling forced closures
         EventListener.addShutdownHook();
 
+        // Register key bindings
         ClientRegistry.registerKeyBinding(SneakerManager.toggleSneakKey);
         ClientRegistry.registerKeyBinding(SneakerManager.toggleSprintKey);
 
-        // Register commands
+        // Register all commands
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new FishCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new FarmCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new CrashCommand());
@@ -78,7 +79,7 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new MinerCommand());
     }
 
-    // In your main mod class
+    // Screen scheduling for safe GUI opening
     public static GuiScreen screenToOpenNextTick = null;
 
     @SubscribeEvent
@@ -89,9 +90,5 @@ public class KrunkMode { // .\gradlew.bat           .\gradlew --version
             Minecraft.getMinecraft().displayGuiScreen(screenToOpenNextTick);
             screenToOpenNextTick = null;
         }
-
     }
-
-
 }
-

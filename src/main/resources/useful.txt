@@ -1,0 +1,50 @@
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Number",
+            description = "This is a number property. It stores an integer between a defined minimum and maximum integer.",
+            category = "Property Overview",
+            min = 0,
+            max = 10
+    )
+    public int demoNumber = 0;
+
+    @Property(
+            type = PropertyType.BUTTON,
+            name = "Button",
+            description = "This is a button property. It runs an action when clicked.",
+            category = "Property Overview"
+    )
+   public void demoButton() {
+       try {
+           // Replace with your YouTube link
+           URI youtubeUri = new URI("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+
+           // Check if the Desktop API is supported
+           if (Desktop.isDesktopSupported()) {
+               Desktop.getDesktop().browse(youtubeUri);
+           } else {
+               UChat.chat("Desktop not supported. Could not open link.");
+           }
+       } catch (Exception e) {
+           e.printStackTrace();
+           UChat.chat("Failed to open YouTube link: " + e.getMessage());
+       }
+   }
+
+@Property(
+        type = PropertyType.SELECTOR,
+        name = "Selector",
+        description = "This is a selector property. It stores a specific item in a list of strings. The property will store the index of the list, not the string.",
+        category = "Property Overview",
+        options = {"Option 1", "Option 2", "Option 3"}
+)
+public int demoSelector = 0;
+
+    @Property(
+            type = PropertyType.COLOR,
+            name = "GUI Theme Color",
+            description = "Primary color for GUI elements",
+            category = "Appearance",
+            subcategory = "Hello guys"
+    )
+    public java.awt.Color guiThemeColor = new java.awt.Color(255, 0, 51);  Cyan

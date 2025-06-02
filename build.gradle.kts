@@ -5,6 +5,8 @@ plugins {
     java
     id("gg.essential.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
+
+    //Vigilance
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -45,10 +47,10 @@ loom {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
         // If you don't want mixins, remove this lines
         mixinConfig("mixins.$modid.json")
-	    if (transformerFile.exists()) {
-			println("Installing access transformer")
-		    accessTransformer(transformerFile)
-	    }
+        if (transformerFile.exists()) {
+            println("Installing access transformer")
+            accessTransformer(transformerFile)
+        }
     }
     // If you don't want mixins, remove these lines
     mixin {
@@ -67,6 +69,8 @@ repositories {
     maven("https://repo.spongepowered.org/maven/")
     // If you don't want to log in with your real minecraft account, remove this line
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+
+    maven(url = "https://repo.essential.gg/repository/maven-public")
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -85,9 +89,16 @@ dependencies {
     }
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
 
+    // Add Kotlin stdlib for annotation processing
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
+    annotationProcessor("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
+
     // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
 
+    //Vigilance - CHANGED: Move to shadowImpl for proper relocation
+    shadowImpl("gg.essential:vigilance:306")
+    shadowImpl("gg.essential:universalcraft-1.8.9-forge:401")
 }
 
 // Tasks:
@@ -105,8 +116,8 @@ tasks.withType(org.gradle.jvm.tasks.Jar::class) {
         // If you don't want mixins, remove these lines
         this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
         this["MixinConfigs"] = "mixins.$modid.json"
-	    if (transformerFile.exists())
-			this["FMLAT"] = "${modid}_at.cfg"
+        if (transformerFile.exists())
+            this["FMLAT"] = "${modid}_at.cfg"
     }
 }
 
@@ -145,9 +156,15 @@ tasks.shadowJar {
         }
     }
 
-    // If you want to include other dependencies and shadow them, you can relocate them in here
+    // IMPORTANT: Add Vigilance relocations to prevent conflicts with other mods
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+
+    // Relocate Vigilance and its dependencies
+    relocate("gg.essential.vigilance")
+    relocate("gg.essential.elementa")
+    relocate("gg.essential.universalcraft")
 }
+
 loom {
     runs {
         named("client") {
@@ -160,4 +177,3 @@ loom {
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
-

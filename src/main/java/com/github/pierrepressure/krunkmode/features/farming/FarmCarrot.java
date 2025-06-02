@@ -14,7 +14,6 @@ public class FarmCarrot extends FarmCrop {
     private final int[] STEP_DURATIONS;
     private static boolean[][] STEP_KEYS;
     private final int randomDelay = new Random().nextInt(300);
-    private int delaySwitchHotbarTicks = -1;
 
     private FarmCarrot() {
         // Durations for each step in milliseconds
@@ -68,16 +67,6 @@ public class FarmCarrot extends FarmCrop {
     @Override
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning || event.phase != TickEvent.Phase.END) return;
-
-        // Handle delayed hotbar switching
-        if (delaySwitchHotbarTicks > 0) {
-            delaySwitchHotbarTicks--;
-        } else if (delaySwitchHotbarTicks == 0) {
-            if (mc != null && mc.thePlayer != null && mc.thePlayer.inventory != null) {
-                mc.thePlayer.inventory.currentItem = 8; // Select slot 9
-            }
-            delaySwitchHotbarTicks = -1; // Reset the delay
-        }
 
         // Check if player or Minecraft instance is null (safety check)
         if (mc == null || mc.thePlayer == null) return;
@@ -155,11 +144,11 @@ public class FarmCarrot extends FarmCrop {
      */
     public void toggle(EntityPlayer player) {
         if (player.getName().equals("BlueSquire")) {
-            STEP_KEYS[1] = new boolean[]{false, true, false}; //1: Move Right
-            STEP_KEYS[3] = new boolean[]{true, false, false}; //3: Move Left
-            STEP_KEYS[5] = new boolean[]{false, true, false}; //5: Move Right
-            STEP_KEYS[7] = new boolean[]{true, false, false}; //7: Move Left
-            STEP_KEYS[9] = new boolean[]{false, true, false}; //9: Move Right
+            STEP_KEYS[1] = new boolean[]{true, false, false}; //1: Move Left
+            STEP_KEYS[3] = new boolean[]{false, true, false}; //3: Move Right
+            STEP_KEYS[5] = new boolean[]{true, false, false}; //5: Move Left
+            STEP_KEYS[7] = new boolean[]{false, true, false}; //7: Move Right
+            STEP_KEYS[9] = new boolean[]{true, false, false}; //9: Move Left
             mc.thePlayer.addChatMessage(new ChatComponentText("§6[KM] §bBlueSquire §6Detected!"));
         }
         FarmCrop.toggle(player, this);

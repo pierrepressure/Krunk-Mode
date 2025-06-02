@@ -14,7 +14,6 @@ public class FarmCane extends FarmCrop {
     private int[] STEP_DURATIONS;
     private static boolean[][] STEP_KEYS;
     private final int randomDelay = new Random().nextInt(300);
-    private int delaySwitchHotbarTicks = -1;
     private int caneLoops=5;
     private int caneLoopStep = 1;
 
@@ -60,16 +59,6 @@ public class FarmCane extends FarmCrop {
     @Override
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning || event.phase != TickEvent.Phase.END) return;
-
-        // Handle delayed hotbar switching
-        if (delaySwitchHotbarTicks > 0) {
-            delaySwitchHotbarTicks--;
-        } else if (delaySwitchHotbarTicks == 0) {
-            if (mc != null && mc.thePlayer != null && mc.thePlayer.inventory != null) {
-                mc.thePlayer.inventory.currentItem = 8; // Select slot 9
-            }
-            delaySwitchHotbarTicks = -1; // Reset the delay
-        }
 
         // Check if player or Minecraft instance is null (safety check)
         if (mc == null || mc.thePlayer == null) return;
@@ -158,21 +147,21 @@ public class FarmCane extends FarmCrop {
         if (player.getName().equals("BlueSquire")) {
             STEP_DURATIONS = new int[]{
                     500,     // 0: Start
-                    20000 + randomDelay,  // 1: Forward+right
+                    31000 + randomDelay,  // 1: right
                     100,                // 2: Release
-                    20000 + randomDelay,  // 3: back
+                    31000 + randomDelay,  // 3: back
                     100,                // 4: Release
-                    20000 + randomDelay,  // 5: Forward+right
+                    31000 + randomDelay,  // 5: right
                     100,                // 6: Release
             };
 
             STEP_KEYS = new boolean[][]{
                     {false, false, false,false},  // 0: Start
-                    {false, true, false,true},   // 1: Forward+Right
+                    {false, true, false,false},   // 1: Right
                     {false, false, false,false},  // 2: Release
                     {false, false, true,false},   // 3: Back
                     {false, false, false,false},  // 4: Release
-                    {false, true, false,true},   // 5: Forward+Right
+                    {false, true, false,false},   // 5: Right
                     {false, false, false,false},  // 6: Release
             };
 

@@ -63,16 +63,6 @@ public class FarmPumpkin extends FarmCrop {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning || event.phase != TickEvent.Phase.END) return;
 
-        // Handle delayed hotbar switching
-        if (delaySwitchHotbarTicks > 0) {
-            delaySwitchHotbarTicks--;
-        } else if (delaySwitchHotbarTicks == 0) {
-            if (mc != null && mc.thePlayer != null && mc.thePlayer.inventory != null) {
-                mc.thePlayer.inventory.currentItem = 8; // Select slot 9
-            }
-            delaySwitchHotbarTicks = -1; // Reset the delay
-        }
-
         // Check if player or Minecraft instance is null (safety check)
         if (mc == null || mc.thePlayer == null) return;
 
