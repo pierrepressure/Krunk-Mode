@@ -131,6 +131,7 @@ public class WarpCommandHandler {
         //Temporary event islands
         registerCommand(new WarpCommand("carnival"));
         registerCommand(new WarpCommand("jerry"));
+        registerCommand(new WarpCommand("stonks"));
 
 
     }

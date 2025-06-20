@@ -24,8 +24,8 @@ public enum ClickerManager {
 
     public static void init(VigilanceConfig config) {
         ClickerManager.config = config;
-        maxCps = config.maxCps;
-        minCps = config.minCps;
+        maxCps = config.cps + 2;
+        minCps = config.cps - 2;
     }
 
     public void toggle() {
@@ -98,9 +98,9 @@ public enum ClickerManager {
     // If you have methods that update config values:
     public static void updateSettings() {
 
-        if (minCps != config.minCps ||maxCps != config.maxCps) {
-            minCps = Math.min(config.minCps, config.maxCps);
-            maxCps = Math.max(config.minCps, config.maxCps);
+        if (minCps != config.cps - 2 || maxCps != config.cps + 2) {
+            maxCps = config.cps + 2;
+            minCps = config.cps - 2;
 //            mc.thePlayer.addChatMessage(new ChatComponentText("§6§lUPDATED! §6MinCPS: §a§l"
 //                    + minCps+ " §6MaxCPS: §a§l"+maxCps));
         }

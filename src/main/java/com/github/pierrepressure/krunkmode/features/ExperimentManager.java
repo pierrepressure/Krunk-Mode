@@ -11,7 +11,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -159,7 +158,7 @@ public class ExperimentManager {
             long requiredDelay = clickDelay + currentRandomDelay;
 
             if (timeSinceLastClick >= requiredDelay) {
-                windowClick(chronomatronOrder.get(clicks), 3); // Middle click
+                windowClick(chronomatronOrder.get(clicks)); // Middle click
                 lastClickTime = currentTime;
                 clicks++;
                 currentRandomDelay = getRandomDelay(); // Get new random delay for next click
@@ -214,7 +213,7 @@ public class ExperimentManager {
             if (timeSinceLastClick >= requiredDelay) {
                 Integer slotNumber = ultrasequencerOrder.get(clicks);
                 if (slotNumber != null) {
-                    windowClick(slotNumber, 3); // Middle click
+                    windowClick(slotNumber); // Middle click
                     lastClickTime = currentTime;
                     clicks++;
                     currentRandomDelay = getRandomDelay(); // Get new random delay for next click
@@ -228,20 +227,17 @@ public class ExperimentManager {
         return random.nextInt(101); // Random delay between -25ms and +25ms
     }
 
-    private static void windowClick(int slotNumber, int clickType) {
+    private static void windowClick(int slotNumber) {
         if (mc.thePlayer != null && mc.thePlayer.openContainer != null) {
-            long currentTime = System.currentTimeMillis();
-            long timeSinceLastClick = currentTime - lastClickTime;
-
+            // This automatically handles both client and server side
             mc.playerController.windowClick(
                     mc.thePlayer.openContainer.windowId,
                     slotNumber,
-                    2, // mouseButton
-                    clickType, // mode (2 = middle click)
+                    0, // mouse button (0 = left, 1 = right)
+                    0, // click mode (0 = normal, 1 = shift, etc.)
                     mc.thePlayer
             );
-
-
         }
     }
+    
 }

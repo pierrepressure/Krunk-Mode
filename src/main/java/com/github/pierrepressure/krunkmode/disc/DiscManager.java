@@ -332,7 +332,7 @@ public class DiscManager {
             sendDeathMessage(playerName, discordMessage);
 
         } catch (Exception e) {
-            System.err.println("Error processing death message: " + e.getMessage());
+            System.out.println("Error processing death message: " + e.getMessage());
             e.printStackTrace();
         }
     }

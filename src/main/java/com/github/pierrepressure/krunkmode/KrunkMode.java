@@ -2,11 +2,8 @@ package com.github.pierrepressure.krunkmode;
 
 import com.github.pierrepressure.krunkmode.commands.*;
 import com.github.pierrepressure.krunkmode.commands.warp.WarpCommandHandler;
-import com.github.pierrepressure.krunkmode.features.ExperimentManager;
-import com.github.pierrepressure.krunkmode.features.FisherManager;
+import com.github.pierrepressure.krunkmode.features.*;
 import com.github.pierrepressure.krunkmode.features.farming.FarmCrop;
-import com.github.pierrepressure.krunkmode.features.ClickerManager;
-import com.github.pierrepressure.krunkmode.features.SneakerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,6 +39,12 @@ public class KrunkMode {
         ClickerManager.init(config);
         FisherManager.init(config);
         ExperimentManager.init(config);
+        // Initialize EmoteManager
+        EmoteManager.INSTANCE.init(config);
+
+        // Initialize LobbyTracker server data after config is loaded
+        // This should be done AFTER config initialization
+        LobbyTracker.getInstance();
     }
 
 
@@ -67,6 +70,7 @@ public class KrunkMode {
         // Register key bindings
         ClientRegistry.registerKeyBinding(SneakerManager.toggleSneakKey);
         ClientRegistry.registerKeyBinding(SneakerManager.toggleSprintKey);
+        ClientRegistry.registerKeyBinding(MinerManager.minerTeleportKey);
 
         // Register all commands
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new FishCommand());
@@ -77,6 +81,7 @@ public class KrunkMode {
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new MenuCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new ClickerCommand());
         net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new MinerCommand());
+        net.minecraftforge.client.ClientCommandHandler.instance.registerCommand(new VisitCommand());
     }
 
     // Screen scheduling for safe GUI opening

@@ -57,6 +57,16 @@ public class EventListener {
         // Only call Clicker if it's running
         if (MinerManager.INSTANCE.isEnabled()) MinerManager.INSTANCE.onTick(event);
 
+        // Call LobbyTracker if it's enabled
+        if (KrunkMode.config.lobbyTrackingEnabled) {
+            LobbyTracker.INSTANCE.onTick(event);
+        }
+
+        // Call LobbyTracker if it's enabled
+        if (KrunkMode.config.chatEmotes) {
+            EmoteManager.INSTANCE.onTick(event);
+        }
+
         //trolling
         if (Minecraft.getMinecraft().thePlayer != null &&
                 Minecraft.getMinecraft().thePlayer.getName().equals("BluesSquire") &&
@@ -72,6 +82,11 @@ public class EventListener {
         if (FarmCrop.isRunning()) {
             FarmCrop.INSTANCE.onWorldLoad(event);
         }
+
+        if (KrunkMode.config.lobbyTrackingEnabled) {
+            LobbyTracker.INSTANCE.onWorldLoad(event);
+        }
+
     }
 
     @SubscribeEvent
@@ -122,7 +137,7 @@ public class EventListener {
         String formattedMessage = message.getFormattedText();
 
         // Pattern 2: Check unformatted message for skull symbol and "You"
-        if (formattedMessage.contains("☠") && formattedMessage.contains("You") && !formattedMessage.contains(":")) {
+        if (formattedMessage.contains("☠") && formattedMessage.contains("You") && !formattedMessage.contains(":")&& !formattedMessage.contains("Onyx")) {
             DiscManager.handleDeathMessage(formattedMessage);
         }
     }

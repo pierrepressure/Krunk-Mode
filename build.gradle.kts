@@ -98,6 +98,7 @@ dependencies {
 
     //Vigilance - CHANGED: Move to shadowImpl for proper relocation
     shadowImpl("gg.essential:vigilance:306")
+
     shadowImpl("gg.essential:universalcraft-1.8.9-forge:401")
 }
 
@@ -165,6 +166,7 @@ tasks.shadowJar {
     relocate("gg.essential.universalcraft")
 }
 
+
 loom {
     runs {
         named("client") {
@@ -176,4 +178,7 @@ loom {
     }
 }
 
+
+
 tasks.assemble.get().dependsOn(tasks.remapJar)
+
